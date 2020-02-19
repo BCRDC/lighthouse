@@ -1,0 +1,19 @@
+# https://github.com/JHinW/AzureUsage/blob/master/csharp/CertAccess/docker-compose.yml
+
+
+version: '3.2'
+services:
+  lighthouse:
+    build:
+      context: .
+      dockerfile: Lighthouse/Dockerfile-bccs-linux
+    user: root
+    image: "bluecloud.ccs.lighthouse:local"
+    ports:
+      - '9110:9110
+      - '4053:4053'
+    environment:
+      ACTORSYSTEM: "bccs"
+      CLUSTER_IP: lighthouse
+      CLUSTER_PORT: 4053
+      CLUSTER_SEEDS: "akka.tcp://bccs@lighthouse:4053"

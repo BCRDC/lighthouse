@@ -1,0 +1,33 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:2.1-bionic AS base
+WORKDIR /app
+
+
+# Install Petabridge.Cmd client so it can be invoked remotely via
+# Docker or K8s 'exec` commands
+RUN dotnet tool install --global pbm 
+
+# RUN pbm help
+
+FROM mcr.microsoft.com/dotnet/core/sdk:2.1-bionic AS build
+WORKDIR /src
+COPY  common.props .
+COPY ./Lighthouse Lighthouse/
+
+RUN dotnet restore "Lighthouse/Lighthouse.csproj"
+
+FROM build AS publish
+RUN dotnet publish "Lighthouse/Lighthouse.csproj" -c Release --framework netcoreapp2.1 -o /app
+
+
+FROM mcr.microsoft.com/dotnet/core/runtime:2.1-bionic AS app
+WORKDIR /app
+
+COPY --from=publish /app .
+
+# copy .NET Core global tool
+COPY --from=base /root/.dotnet /root/.dotnet/
+
+# Needed because https://stackoverflow.com/questions/51977474/install-dotnet-core-tool-dockerfile
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+CMD ["dotnet", "Lighthouse.dll"]
