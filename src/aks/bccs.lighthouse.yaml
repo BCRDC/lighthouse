@@ -15,6 +15,8 @@ spec:
       labels:
         app: akka.lighthouse
     spec:
+      nodeSelector:
+        app: akka.node01
       hostname: lighthouse
       subdomain: akkadomain
       containers:
@@ -46,9 +48,7 @@ spec:
           # to add to the container
           name: bccs-cluster
 
-
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
