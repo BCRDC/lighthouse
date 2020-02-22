@@ -10,10 +10,44 @@ services:
     user: root
     image: "bluecloud.ccs.lighthouse:local"
     ports:
-      - '9110:9110
+      # - '9110:9110'
       - '4053:4053'
     environment:
       ACTORSYSTEM: "bccs"
-      CLUSTER_IP: lighthouse
+      CLUSTER_IP: app
       CLUSTER_PORT: 4053
-      CLUSTER_SEEDS: "akka.tcp://bccs@lighthouse:4053"
+      CLUSTER_SEEDS: "akka.tcp://bccs@app:4053;akka.tcp://bccs@app1:4054"
+    networks:
+      app_net:
+    #     ipv4_address: 192.168.4.12
+        aliases:
+          - app
+  lighthouse1:
+    build:
+      context: .
+      dockerfile: Lighthouse/Dockerfile-bccs-linux
+    user: root
+    image: "bluecloud.ccs.lighthouse:local"
+    ports:
+      # - '9110:9110'
+      - '4054:4054'
+    environment:
+      ACTORSYSTEM: "bccs"
+      CLUSTER_IP: app1
+      CLUSTER_PORT: 4054
+      CLUSTER_SEEDS: "akka.tcp://bccs@app:4053;akka.tcp://bccs@app1:4054"
+    networks:
+      app_net:
+    #     ipv4_address: 192.168.4.11
+        aliases:
+          - app1
+
+
+networks:
+  app_net:
+#     ipam:
+#       config:
+#       - subnet: 192.168.4.0/24
+
+
+      #docker network create --subnet=192.168.3.0/24  lighthouse

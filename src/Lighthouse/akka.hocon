@@ -26,7 +26,7 @@ akka {
       #will be populated with a dynamic host-name at runtime if left uncommented
       #public-hostname = "POPULATE STATIC IP HERE"
       hostname = "0.0.0.0"
-      port = 4053
+      port = 4054
     }
   }            
 
@@ -34,6 +34,6 @@ akka {
     #will inject this node as a self-seed node at run-time
     seed-nodes = [] 
     roles = [lighthouse]
-    auto-down-unreachable-after = 600s
+    auto-down-unreachable-after = off
   }
 }

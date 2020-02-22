@@ -66,21 +66,33 @@ namespace Lighthouse
             Config injectedClusterConfigString = null;
 
 
-            if (!seeds.Contains(selfAddress))
+            if (!IsNullOrEmpty(Environment.GetEnvironmentVariable("CLUSTER_SEEDS")?.Trim()))
             {
-                seeds.Add(selfAddress);
 
-                if (seeds.Count > 1)
-                {
-                    injectedClusterConfigString = seeds.Aggregate("akka.cluster.seed-nodes = [",
-                        (current, seed) => current + @"""" + seed + @""", ");
-                    injectedClusterConfigString += "]";
-                }
-                else
-                {
-                    injectedClusterConfigString = "akka.cluster.seed-nodes = [\"" + selfAddress + "\"]";
-                }
+                injectedClusterConfigString = Environment.GetEnvironmentVariable("CLUSTER_SEEDS")
+                    .Split(new[] { ';'}).Aggregate("akka.cluster.seed-nodes = [",
+                         (current, seed) => current + @"""" + seed + @""", ");
+
+                injectedClusterConfigString += "]";
             }
+
+            
+
+            //if (!seeds.Contains(selfAddress))
+            //{
+            //    seeds.Add(selfAddress);
+
+            //    if (seeds.Count > 1)
+            //    {
+            //        injectedClusterConfigString = seeds.Aggregate("akka.cluster.seed-nodes = [",
+            //            (current, seed) => current + @"""" + seed + @""", ");
+            //        injectedClusterConfigString += "]";
+            //    }
+            //    else
+            //    {
+            //        injectedClusterConfigString = "akka.cluster.seed-nodes = [\"" + selfAddress + "\"]";
+            //    }
+            //}
 
 
             var finalConfig = injectedClusterConfigString != null

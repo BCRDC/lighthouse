@@ -26,3 +26,19 @@ https://stackoverflow.com/questions/38216278/update-k8s-configmap-or-secret-with
 kubectl get nodes -o name
 
 kubectl label nodes node/aks-agentpool-25762600-0 app=akka.node01
+
+
+
+# use external network
+https://stackoverflow.com/questions/46461977/docker-compose-v3-static-ip
+
+docker network create --subnet 10.5.0.0/24 local_network_dev
+
+
+
+# how to pass env as yaml content
+
+https://github.com/kubernetes/kubernetes/issues/57726
+
+
+sample : https://github.com/kubernetes/kubernetes/blob/master/cluster/addons/fluentd-elasticsearch/es-statefulset.yaml

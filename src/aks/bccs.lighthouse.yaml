@@ -1,46 +1,49 @@
-apiVersion: apps/v1beta2
-kind: Deployment
+  #  message-0.dispatcher.bccs.svc.cluster.local
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  name: akka.lighthouse
+  name: lighthouse
   namespace: bccs
-  labels:
-    app: akka.lighthouse
+  # labels:
+  #   app: bluelcoud.ccs.dispatcher
 spec:
-  replicas: 1
+  serviceName: lighthouse
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
   selector:
     matchLabels:
-      app: akka.lighthouse
+      app: bluelcoud.ccs.cluster
   template:
     metadata:
       labels:
-        app: akka.lighthouse
+        app: bluelcoud.ccs.cluster
     spec:
-      nodeSelector:
-        app: akka.node01
-      hostname: lighthouse
-      subdomain: akkadomain
       containers:
-      - name: akkalighthouse
-        image: ccsacr.azurecr.cn/lighthouse:v1
+      - name: bluelcoudccscluster
+        image: ccsacr.azurecr.cn/lighthouse:v0222
+        imagePullPolicy: Always
         ports:
         - containerPort: 9110
           protocol: TCP
         - containerPort: 4053
           protocol: TCP
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: ACTORSYSTEM
-          value: "bccs"
-        - name: CLUSTER_PORT
-          value: "4053"
-        - name: CLUSTER_IP
-          value: "lighthouse.akkadomain.bccs.svc.cluster.local"
-        - name: CLUSTER_SEEDS
-          value: "akka.tcp://bccs@lighthouse.akkadomain.bccs.svc.cluster.local:4053"
         volumeMounts:
         - name: bccs-cluster
           mountPath: /app/akka.hocon
           subPath: akka.hocon
+        env:
+        - name: ACTORSYSTEM
+          value: "bccs"
+        - name: CLUSTER_IP
+          value: "$(HOST).clustersvc.bccs.svc.cluster.local"
+        - name: CLUSTER_SEEDS
+          value: "akka.tcp://bccs@lighthouse-0.clustersvc.bccs.svc.cluster.local:4053;akka.tcp://bccs@lighthouse-1.clustersvc.bccs.svc.cluster.local:4053;akka.tcp://bccs@lighthouse-2.clustersvc.bccs.svc.cluster.local:4053"
+        - name: HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       volumes:
       - name: bccs-cluster
         configMap:
@@ -52,17 +55,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: akkadomain
+  name: clustersvc
   namespace: bccs
+  # labels:
+  #   app: bluelcoud.ccs.dispatcher
 spec:
-  selector:
-    app: akka.lighthouse
-  # clusterIP: None
-  type: ClusterIP
   ports:
-  - name: lighthouse01forpod1
-    port: 4053
-    targetPort: 4053
-  - name: lighthouse02forpod1
-    port: 9110
-    targetPort: 9110
+  - port: 9110
+    name: server
+  - port: 4053
+    name: leader
+  type: ClusterIP
+  selector:
+    app: bluelcoud.ccs.cluster
